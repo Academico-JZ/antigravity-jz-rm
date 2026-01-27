@@ -8,7 +8,6 @@ def sync_kit(repo_url, kit_name):
     print(f"🔄 Sincronizando {kit_name} desde {repo_url}...")
     
     # Resolvendo o root do projeto dinamicamente
-    # Este script está em .agent/scripts/sync_kits.py
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
     agent_dir = os.path.join(project_root, ".agent")
@@ -30,6 +29,7 @@ def sync_kit(repo_url, kit_name):
             
             try:
                 print(f"  -> Tentando branch '{branch}' em {zip_url}...")
+                # User-Agent é opcional mas ajuda a evitar bloqueios simples
                 req = urllib.request.Request(zip_url, headers={'User-Agent': 'Mozilla/5.0'})
                 with urllib.request.urlopen(req) as response, open(temp_zip, 'wb') as out_file:
                     out_file.write(response.read())
@@ -91,10 +91,6 @@ def sync_kit(repo_url, kit_name):
     print(f"✅ Sincronização de {kit_name} (branch: {active_branch}) concluída!")
 
 if __name__ == "__main__":
-    # Kit 1 (Awesome Skills) - Focado em Skills
     sync_kit("https://github.com/sickn33/antigravity-awesome-skills.git", "Awesome Skills")
-    
-    # Kit 2 (Antigravity Kit) - Focado em Agents/Workflows
     sync_kit("https://github.com/vudovn/antigravity-kit.git", "Antigravity Kit")
-    
-    print("\n✨ Todos os kits foram processados!")
+    print("\n✨ Todos os kits foram sincronizados com sucesso!")

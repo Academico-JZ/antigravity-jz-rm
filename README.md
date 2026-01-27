@@ -1,0 +1,62 @@
+# 🌌 Antigravity Kit (JZ Edition)
+
+> **A fusão definitiva entre o `Awesome Skills` e o `Antigravity Kit`. 255+ Skills, 20 Agentes e 11+ Workflows em um único ambiente de alta performance.**
+
+---
+
+## 🐣 O que é este Kit?
+
+Este repositório é uma versão consolidada e otimizada do ecossistema Antigravity. Ele combina a vasta biblioteca de habilidades (skills) da comunidade com a orquestração multi-agente para transformar seu assistente de IA em uma agência digital completa.
+
+**Diferenciais desta versão:**
+- ✅ **Portabilidade Total:** Scripts refatorados para funcionar em qualquer máquina sem caminhos fixos.
+- ✅ **Sem Dependência de Git:** Sincronização automática via download de ZIP para ambientes restritos.
+- ✅ **Setup Simplificado:** Instalador PowerShell dinâmico.
+
+---
+
+## 🚀 Instalação Rápida (One-Liner)
+
+Se você não tem o `git` instalado, abra o PowerShell e execute:
+
+```powershell
+powershell -c "cd $HOME; mkdir -p .gemini/antigravity; cd .gemini/antigravity; Invoke-WebRequest -Uri 'https://github.com/Academico-JZ/antigravity-jz/archive/refs/heads/main.zip' -OutFile 'kit.zip'; Expand-Archive -Path 'kit.zip' -DestinationPath 'temp'; Move-Item -Path 'temp/antigravity-jz-main' -Destination 'kit'; Remove-Item 'kit.zip'; Remove-Item 'temp'"
+```
+
+---
+
+## 🏗️ Como vincular a um novo projeto
+
+1. Vá para a pasta do seu projeto.
+2. Execute o script de linkagem (agora portátil):
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.gemini\antigravity\kit\scripts\setup_workspace.ps1"
+   ```
+3. No seu chat com a IA (Gemini/Claude Code), peça:
+   > "Leia o arquivo `.agent/GEMINI.md` para ativar suas novas capacidades."
+
+---
+
+## 🛠️ Comandos Slash (Workflows)
+
+| Comando | Descrição |
+| :--- | :--- |
+| `/plan` | Cria um plano técnico detalhado sem escrever código. |
+| `/brainstorm` | Processo de discovery socrático para validar ideias. |
+| `/create` | Orquestra a criação de uma nova aplicação do zero. |
+| `/debug` | Modo de depuração sistemática com análise de causa raiz. |
+| `/ui-ux-pro-max` | Foco em estética premium e animações. |
+
+---
+
+## 🔄 Sincronização
+
+Mantenha suas skills sempre atualizadas:
+```bash
+python .agent/scripts/sync_kits.py
+```
+
+---
+
+## 🤝 Créditos
+Inspirado pelos trabalhos de **sickn33** e **vudovn**. Refatorado e modularizado por **Suporte-ti-FILTROAMB**.
