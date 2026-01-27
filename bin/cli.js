@@ -39,7 +39,15 @@ function getHomeDir() {
 function downloadFile(url, dest) {
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(dest);
-        https.get(url, (response) => {
+        const request = https.get(url, (response) => {
+            // Handle redirects (GitHub often does 302 to codeload)
+            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                file.close();
+                fs.unlink(dest, () => {}); // Delete partial file
+                downloadFile(response.headers.location, dest).then(resolve).catch(reject);
+                return;
+            }
+
             if (response.statusCode !== 200) {
                 reject(new Error(`Failed to download: ${response.statusCode}`));
                 return;
@@ -50,7 +58,7 @@ function downloadFile(url, dest) {
                 resolve();
             });
         }).on('error', (err) => {
-            fs.unlink(dest, () => { });
+            fs.unlink(dest, () => {});
             reject(err);
         });
     });
