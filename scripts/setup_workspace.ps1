@@ -7,11 +7,6 @@ $LocalAgentPath = Join-Path (Get-Location) ".agent"
 Write-Host "[AG-KIT] Initializing Workspace Link..." -ForegroundColor Cyan
 
 if (-not (Test-Path $GlobalKitPath)) {
-    Write-Host "[!] Global Kit not found in user profile. Trying current directory kit path..." -ForegroundColor Yellow
-    $GlobalKitPath = Join-Path (Get-Location) "kit"
-}
-
-if (-not (Test-Path $GlobalKitPath)) {
     Write-Error "Global Kit not found at $GlobalKitPath. Please ensure the kit is installed in your home directory."
     exit 1
 }
@@ -23,15 +18,25 @@ if (-not (Test-Path $LocalAgentPath)) {
 }
 
 # 2. Copy Architecture (Required for context)
-Copy-Item "$GlobalKitPath\ARCHITECTURE.md" -Destination "$LocalAgentPath\ARCHITECTURE.md" -Force
-Write-Host " [+] Linker: ARCHITECTURE.md" -ForegroundColor Gray
+$SourceArch = Join-Path $GlobalKitPath ".agent\ARCHITECTURE.md"
+if (Test-Path $SourceArch) {
+    Copy-Item $SourceArch -Destination "$LocalAgentPath\ARCHITECTURE.md" -Force
+    Write-Host " [+] Linker: ARCHITECTURE.md" -ForegroundColor Gray
+} else {
+    Write-Host " [!] ARCHITECTURE.md not found in kit, skipping..." -ForegroundColor Yellow
+}
 
 # 3. Copy Workflows (Required for VS Code Menu)
-if (Test-Path "$LocalAgentPath\workflows") {
-    Remove-Item "$LocalAgentPath\workflows" -Recurse -Force
+$SourceWorkflows = Join-Path $GlobalKitPath ".agent\workflows"
+if (Test-Path $SourceWorkflows) {
+    if (Test-Path "$LocalAgentPath\workflows") {
+        Remove-Item "$LocalAgentPath\workflows" -Recurse -Force
+    }
+    Copy-Item $SourceWorkflows -Destination "$LocalAgentPath" -Recurse -Force
+    Write-Host " [+] Linker: Workflows" -ForegroundColor Gray
+} else {
+    Write-Host " [!] Workflows folder not found in kit, skipping..." -ForegroundColor Yellow
 }
-Copy-Item "$GlobalKitPath\workflows" -Destination "$LocalAgentPath" -Recurse -Force
-Write-Host " [+] Linker: Workflows" -ForegroundColor Gray
 
 # 4. Create .pointer file (Optional, for explicit tracking)
 "path=$GlobalKitPath" | Out-File "$LocalAgentPath\.pointer" -Encoding utf8
