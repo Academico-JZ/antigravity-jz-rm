@@ -171,6 +171,8 @@ async function main() {
             throw new Error("Could not find extracted folder in temporary directory.");
         }
 
+        const sourcePath = path.join(tempDir, extractedName);
+
         if (isLocal) {
             log(`[>] Local Mode: Populating .agent directory...`, colors.gray);
             const repoAgentPath = path.join(sourcePath, '.agent');
