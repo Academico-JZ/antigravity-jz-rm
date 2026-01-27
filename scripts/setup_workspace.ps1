@@ -8,7 +8,7 @@ Write-Host "[AG-KIT] Initializing Workspace Link..." -ForegroundColor Cyan
 
 if (-not (Test-Path $GlobalKitPath)) {
     Write-Host "[!] Global Kit not found in user profile. Trying current directory kit path..." -ForegroundColor Yellow
-    $GlobalKitPath = path.join((Get-Location), "kit")
+    $GlobalKitPath = Join-Path (Get-Location) "kit"
 }
 
 if (-not (Test-Path $GlobalKitPath)) {
