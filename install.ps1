@@ -26,7 +26,8 @@ if (Test-Path $KitDir) {
 Write-Host "[>] Baixando última versão do repositório Academico-JZ..." -ForegroundColor Gray
 try {
     Invoke-WebRequest -Uri "https://github.com/Academico-JZ/antigravity-jz-rm/archive/refs/heads/main.zip" -OutFile $ZipFile -ErrorAction Stop
-} catch {
+}
+catch {
     Write-Error "Erro ao baixar o kit: $_"
     exit 1
 }
@@ -43,6 +44,23 @@ Move-Item -Path $ExtractedFolder.FullName -Destination $KitDir
 # 5. Cleanup Final
 Remove-Item $ZipFile -Force
 Remove-Item $TempExt -Recurse -Force
+
+# 6. Auto-Hydration (Sync Skills)
+Write-Host ""
+Write-Host "🔄 Sincronizando Skills (Vudovn + Awesome Skills)..." -ForegroundColor Cyan
+try {
+    # Verifica se python está instalado
+    & python --version | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        python "$KitDir\.agent\scripts\sync_kits.py"
+    }
+    else {
+        Write-Host "[!] Python não encontrado. Por favor, instale o Python para habilitar o sincronismo automático." -ForegroundColor Yellow
+    }
+}
+catch {
+    Write-Host "[!] Falha ao iniciar sincronismo automático. Tente rodar manualmente: python `"$KitDir\.agent\scripts\sync_kits.py`"" -ForegroundColor Yellow
+}
 
 Write-Host ""
 Write-Host "✅ Instalação Global Concluída com Sucesso!" -ForegroundColor Green

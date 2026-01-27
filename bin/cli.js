@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Antigravity Kit (JZ e RM Edition) - Node.js Installer
+ * Antigravity Kit (JZ Edition) - Node.js Installer
  * 
  * Provides "npx ag-jz-rm init" functionality.
  * Compatible with Windows, macOS, and Linux.
@@ -50,7 +50,7 @@ function downloadFile(url, dest) {
                 resolve();
             });
         }).on('error', (err) => {
-            fs.unlink(dest, () => {});
+            fs.unlink(dest, () => { });
             reject(err);
         });
     });
@@ -84,7 +84,7 @@ async function main() {
         } catch (e) {
             // Fallback for older Windows without tar?
             if (process.platform === 'win32') {
-                 execSync(`powershell -c "Expand-Archive -Path '${zipPath}' -DestinationPath '${tempDir}' -Force"`);
+                execSync(`powershell -c "Expand-Archive -Path '${zipPath}' -DestinationPath '${tempDir}' -Force"`);
             } else {
                 throw e;
             }
@@ -95,11 +95,18 @@ async function main() {
             log(`[!] Removing existing installation...`, colors.yellow);
             fs.rmSync(installDir, { recursive: true, force: true });
         }
-        
-        // Find extracted folder
-        const extractedName = fs.readdirSync(tempDir).find(n => n.includes('antigravity-jz'));
+
+        // Find extracted folder (GitHub names it repo-branch, e.g. antigravity-jz-rm-main)
+        const extractedName = fs.readdirSync(tempDir).find(n => {
+            const fullPath = path.join(tempDir, n);
+            return fs.statSync(fullPath).isDirectory() && n !== "__MACOSX";
+        });
+
+        if (!extractedName) {
+            throw new Error("Could not find extracted folder in temporary directory.");
+        }
+
         const sourcePath = path.join(tempDir, extractedName);
-        
         fs.mkdirSync(path.dirname(installDir), { recursive: true });
         fs.renameSync(sourcePath, installDir);
 
@@ -123,7 +130,7 @@ async function main() {
         log(`\n✅ Installation & Hydration Complete!`, colors.green);
         log(`📍 Location: ${installDir}`, colors.gray);
         log(`\n🚀 Next Steps:`, colors.cyan);
-        
+
         if (process.platform === 'win32') {
             log(`Run this command in your project folder to link it:`, colors.yellow);
             log(`powershell -ExecutionPolicy Bypass -File "${path.join(installDir, 'scripts', 'setup_workspace.ps1')}"\n`, colors.reset);

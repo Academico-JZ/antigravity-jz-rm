@@ -7,8 +7,12 @@ $LocalAgentPath = Join-Path (Get-Location) ".agent"
 Write-Host "[AG-KIT] Initializing Workspace Link..." -ForegroundColor Cyan
 
 if (-not (Test-Path $GlobalKitPath)) {
-    Write-Host "[AG-KIT] Global Kit not found at $GlobalKitPath." -ForegroundColor Red
-    Write-Host "[AG-KIT] Please ensure the kit is installed in your home directory." -ForegroundColor Yellow
+    Write-Host "[!] Global Kit not found in user profile. Trying current directory kit path..." -ForegroundColor Yellow
+    $GlobalKitPath = path.join((Get-Location), "kit")
+}
+
+if (-not (Test-Path $GlobalKitPath)) {
+    Write-Error "Global Kit not found at $GlobalKitPath. Please ensure the kit is installed in your home directory."
     exit 1
 }
 

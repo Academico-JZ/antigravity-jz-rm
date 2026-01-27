@@ -1,110 +1,72 @@
-# 🌌 Antigravity Omni-JZ Elite
+# 🌌 Antigravity Kit (JZ e RM Edition)
 
-> **The Absolute Union.** Unifying fragmented intelligence into a single, unstoppable digital agency.
-> Fusing **vudovn** architecture with the **sickn33** arsenal and **agentMemory** systems.
-
-[![Arsenal](https://img.shields.io/badge/Arsenal-235--Super--Skills-blueviolet?style=for-the-badge)](https://github.com/Academico-JZ/omni-jz)
-[![Agents](https://img.shields.io/badge/Council-20--Agents-blue?style=for-the-badge)]()
-[![Workflows](https://img.shields.io/badge/Workflow-14--Tactics-success?style=for-the-badge)]()
-[![CLI](https://img.shields.io/badge/CLI-ag--jz-orange?style=for-the-badge)]()
+> **A fusão definitiva entre o `Awesome Skills` e o `Antigravity Kit`. 255+ Skills, 20 Agentes e 11+ Workflows em um único ambiente de alta performance.**
 
 ---
 
-## 🚀 Quick Install
+## 🐣 O que é este Kit?
 
-Get the full arsenal in seconds. No complex setup required.
+Este repositório é uma versão consolidada e otimizada do ecossistema Antigravity. Ele combina a vasta biblioteca de habilidades (skills) da comunidade com a orquestração multi-agente para transformar seu assistente de IA em uma agência digital completa.
 
-### Option 1: Instant Run (npx)
-Use this command to inject the full OS into any project immediately:
+**Diferenciais desta versão:**
+- ✅ **Portabilidade Total:** Scripts refatorados para funcionar em qualquer máquina sem caminhos fixos.
+- ✅ **Sem Dependência de Git:** Sincronização automática via download de ZIP para ambientes restritos.
+- ✅ **Híbrido (PowerShell + Node):** Comandos nativos para Windows ou via NPM para devs web.
 
-```bash
-npx omni-jz init
+---
+
+## 🚀 Instalação Rápida (Escolha a sua)
+
+### Opção A: PowerShell One-Liner (Recomendado para Windows)
+Não requer Git nem Node.js instalado.
+```powershell
+powershell -c "irm https://raw.githubusercontent.com/Academico-JZ/antigravity-jz-rm/main/install.ps1 | iex"
 ```
 
-### Option 2: Global Installation
-Install the tool globally to use `ag-jz` anywhere:
-
+### Opção B: Via NPM (Para Web Devs)
+Se você já tem o Node.js instalado:
 ```bash
-npm install -g omni-jz
-ag-jz init
+npx github:Academico-JZ/antigravity-jz-rm init
 ```
-
-> **Note:** This installs the `.agent` folder containing 20 agents, 14 workflows, and 235+ skills into your current directory.
-
----
-
-## 📦 What's Included
-
-The **Omni-JZ Edition (V4.2.1)** represents the complete restoration of the Antigravity ecosystem.
-
-| Component | Count | Description |
-| :--- | :--- | :--- |
-| **🤖 Agents** | **20** | Specialist AI personas (Backend, Frontend, Security, DevOps, etc.) |
-| **⚔️ Skills** | **235** | Domain-specific knowledge modules (React, AWS, Pentesting, SEO, etc.) |
-| **🔄 Workflows** | **14** | Tactical slash command procedures (`/plan`, `/deploy`, `/orchestrate`) |
-| **🔧 CLI** | **1** | `ag-jz` binary for automated management and updates |
+*(Nota: Este comando instala e configura o Kit Global em seu diretório de usuário)*
 
 ---
 
-## 🛠️ CLI Tool Manual (`ag-jz`)
+## 🏗️ Como vincular a um novo projeto
 
-Control the ecosystem with the official global interface.
+1. Vá para a pasta do seu projeto.
+2. Execute o script de linkagem:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.gemini\antigravity\kit\scripts\setup_workspace.ps1"
+   ```
+3. No seu chat com a IA (Gemini/Claude Code/Cursor), peça:
+   > "Leia o arquivo `.agent/GEMINI.md` para ativar suas novas capacidades."
 
-| Command | Description |
+---
+
+## 🛠️ Comandos Slash (Workflows)
+
+| Comando | Descrição |
 | :--- | :--- |
-| `ag-jz init` | **Initial Ignition.** Installs the full `.agent` folder into your project. |
-| `ag-jz sync` | **Heartbeat Sync.** Pulls the latest minds and skills from the matrix. |
-| `ag-jz status` | **System HUD.** Real-time diagnostics of active agents and arsenal count. |
-| `ag-jz fix` | **Self-Repair.** Reinstalls dependencies and fixes structure issues. |
+| `/plan` | Cria um plano técnico detalhado sem escrever código. |
+| `/brainstorm` | Processo de discovery socrático para validar ideias. |
+| `/create` | Orquestra a criação de uma nova aplicação do zero. |
+| `/debug` | Modo de depuração sistemática com análise de causa raiz. |
+| `/ui-ux-pro-max` | Foco em estética premium e animações. |
 
-### Advanced Usage
+---
 
+## 🔄 Sincronização
+
+Mantenha suas skills sempre atualizadas baixando as novidades dos repositórios originais:
 ```bash
-# Force overwrite existing .agent folder
-ag-jz init --force
-
-# Check system integrity
-ag-jz status
+python .agent/scripts/sync_kits.py
 ```
 
 ---
 
-## 🧠 Usage Guide
+## 🤝 Créditos
+Inspirado pelos trabalhos de **[sickn33](https://github.com/sickn33)** e **[vudovn](https://github.com/vudovn)**.
+Refatorado e modularizado por **[Academico-JZ](https://github.com/Academico-JZ)** e **[RMMeurer](https://github.com/rmmeurer)**.
 
-### 1. Agents (Automatic Routing)
-
-**No need to mention agents explicitly!** The system automatically detects and applies the right specialist(s):
-
-```plaintext
-You: "Add JWT authentication"
-AI: 🤖 Applying @security-auditor + @backend-specialist...
-
-You: "Fix the dark mode button"
-AI: 🤖 Using @frontend-specialist...
-```
-
-### 2. Workflows (Slash Commands)
-
-Invoke tactical operations with slash commands:
-
-- **/brainstorm** - Architectural discovery and alternative analysis.
-- **/create** - Scaffolding for new startups and complex features.
-- **/debug** - Integrated investigation of logic and build failures.
-- **/deploy** - Production-ready deployment procedures.
-- **/orchestrate** - Massive multi-agent coordination for complex tasks.
-- **/plan** - Task-list generation and execution roadmap.
-- **/status** - HUD overview of Agent and Repository health.
-- **/ui-ux-pro-max** - Design engine with 50 styles and 21 palettes.
-
-### 3. Skills (Contextual Loading)
-
-Skills are loaded automatically based on task context. The AI reads skill descriptions and applies relevant knowledge (e.g., loading `react-patterns` when working on a `.jsx` file).
-
----
-
-## 🏛️ Heritage & License
-
-**Engineered by:** Academico-JZ
-**License:** MIT
-
-> "The sky is no longer the limit. We are the architects of the void." 🌌
+> Este projeto opera sob a licença MIT, respeitando as liberdades dos códigos originais.
