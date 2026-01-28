@@ -15,7 +15,35 @@ def get_script_path():
     home = Path.home()
     return home / ".gemini" / "antigravity" / "kit" / "scripts" / "workspace_linker.py"
 
+def check_updates():
+    try:
+        import json
+        import urllib.request
+        
+        url = "https://raw.githubusercontent.com/Academico-JZ/ag-jz-rm/main/package.json"
+        with urllib.request.urlopen(url, timeout=3) as response:
+            data = json.loads(response.read().decode())
+            remote_version = data.get("version", "0.0.0")
+            
+            # Simple local check (assuming we are running from the installed kit)
+            # In a real scenario, we'd read the local package.json, but for the vacuum script
+            # running in global automation, we'll just check if there's a mismatch or let the user know.
+            # Ideally, we read ../../../package.json relative to this script.
+            
+            pkg_path = Path(__file__).resolve().parent.parent.parent / "package.json"
+            if pkg_path.exists():
+                with open(pkg_path, encoding='utf-8') as f:
+                    local_pkg = json.load(f)
+                    local_version = local_pkg.get("version", "0.0.0")
+                    
+                    if remote_version > local_version:
+                        print(f"\n🚨  VACUUM UPDATE AVAILABLE: v{local_version} -> v{remote_version}")
+                        print(f"    Run 'ag-jz-rm init' or 'npm i -g Academico-JZ/ag-jz-rm' to update.\n")
+    except Exception:
+        pass # Silent fail avoids blocking automation
+
 def vacuum_playground():
+    check_updates()
     # Detect Playground Root (Assuming standard structure)
     current_script_dir = Path(__file__).resolve().parent
     # Expected: ~/.gemini/antigravity/kit/scripts/playground_vacuum.py

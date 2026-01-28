@@ -208,7 +208,62 @@ async function init(isLocal, installDir, globalKitDir) {
     }
 }
 
+const https = require('https');
+const readline = require('readline');
+
+// ... (imports)
+
+async function checkUpdate() {
+    return new Promise((resolve) => {
+        const url = 'https://raw.githubusercontent.com/Academico-JZ/ag-jz-rm/main/package.json';
+        https.get(url, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    const remotePkg = JSON.parse(data);
+                    const localPkg = require('../package.json');
+
+                    if (remotePkg.version > localPkg.version) {
+                        console.log(colors.yellow(`\n\n🚨  UPDATE AVAILABLE: v${localPkg.version} -> v${remotePkg.version}`));
+                        console.log(colors.gray(`    A new version of JZ-RM Kit is available.`));
+
+                        const rl = readline.createInterface({
+                            input: process.stdin,
+                            output: process.stdout
+                        });
+
+                        rl.question(colors.cyan('    ⚡  Deseja atualizar agora? (S/n) '), (answer) => {
+                            rl.close();
+                            if (answer.toLowerCase() !== 'n') {
+                                console.log(colors.cyan('\n🚀  Updating Quantum Core...'));
+                                try {
+                                    execSync('npm install -g Academico-JZ/ag-jz-rm', { stdio: 'inherit' });
+                                    console.log(colors.green('✅  Update complete! Please run the command again.'));
+                                    process.exit(0);
+                                } catch (e) {
+                                    console.log(colors.red('❌  Update failed. Please run: npm i -g Academico-JZ/ag-jz-rm'));
+                                    resolve();
+                                }
+                            } else {
+                                resolve();
+                            }
+                        });
+                    } else {
+                        resolve();
+                    }
+                } catch (e) {
+                    resolve(); // Silent fail on network/json error
+                }
+            });
+        }).on('error', () => resolve());
+    });
+}
+
 async function main() {
+    await checkUpdate();
+
+    // ... (rest of main)
     const isLocal = process.argv.includes('--local') || process.argv.includes('-l');
     const homeDir = getHomeDir();
     const globalKitDir = path.join(homeDir, KIT_DIR_NAME);
