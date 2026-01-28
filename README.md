@@ -26,8 +26,8 @@ Este repositório é uma evolução do ecossistema Antigravity, consolidando o *
 Acesso total em qualquer terminal e automação completa no seu playground.
 
 ```bash
-# 1. Instale o core ag-jz-rm
-npm i -g Academico-JZ/ag-jz-rm
+# 1. Instale o core ag-jz-rm (com --force para evitar conflitos)
+npm i -g Academico-JZ/ag-jz-rm --force
 
 # 2. Inicialize o motor central
 ag-jz-rm init

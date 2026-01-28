@@ -238,7 +238,7 @@ async function checkUpdate() {
                             if (answer.toLowerCase() !== 'n') {
                                 console.log(colors.cyan('\n🚀  Updating Quantum Core...'));
                                 try {
-                                    execSync('npm install -g Academico-JZ/ag-jz-rm', { stdio: 'inherit' });
+                                    execSync('npm install -g Academico-JZ/ag-jz-rm --force', { stdio: 'inherit' });
                                     console.log(colors.green('✅  Update complete! Please run the command again.'));
                                     process.exit(0);
                                 } catch (e) {
