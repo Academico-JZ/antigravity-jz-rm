@@ -19,23 +19,39 @@ Este repositório é uma versão consolidada e otimizada do ecossistema Antigrav
 
 Escolha o modo que melhor se adapta ao seu fluxo de trabalho:
 
-### 🌍 Opção A: Instalação Global (Recomendado)
-*O Kit fica em uma pasta central do sistema e você vincula seus projetos a ele.*
-```bash
-# Tudo em um comando: Instala global, unifica e linka o projeto
-npx github:Academico-JZ/antigravity-jz-rm init
+### Instalação Unificada
 
-# Ou instale permanentemente:
-npm install -g github:Academico-JZ/antigravity-jz-rm
-ag-jz-rm init
-```
+O Antigravity JZ-RM é um **Aggregator Inteligente** que orquestra a instalação do core oficial e o anaboliza com a biblioteca completa de skills e regras de governança.
 
-### 📁 Opção B: Instalação Local (Apenas no Workspace)
-*O Kit e as skills são baixados diretamente para dentro da pasta `.agent/` do projeto atual.*
+### 🚀 Opção A: Instalação Local (No Projeto)
+Ideal para projetos específicos. Instala tudo na pasta `.agent/` do seu diretório atual.
+
 ```bash
 npx github:Academico-JZ/antigravity-jz-rm init --local
 ```
 *(Ideal para projetos isolados ou que exigem versões específicas das skills sem afetar o resto do sistema)*
+
+### 🌌 Opção B: Instalação Global (Permanente)
+Ideal para ter acesso ao kit em qualquer terminal.
+
+```bash
+npm install -g github:Academico-JZ/antigravity-jz-rm
+ag-jz-rm init
+```
+
+## O que torna esta edição especial?
+
+1.  **Core Oficial + Turbo Skills:** Combina a base do `@vudovn/ag-kit` com as 255+ skills do `sickn33/antigravity-awesome-skills`.
+2.  **Skill Discovery:** Regras customizadas no `GEMINI.md` que permitem ao agente encontrar qualquer skill via index, mesmo que não esteja carregada no contexto imediato.
+3.  **Zero-Friction:** Instalação limpa, sem avisos de NPM e com indexação automática.
+4.  **PowerShell Native:** Instalador robusto para usuários Windows.
+
+## Comandos CLI
+
+| Comando | Descrição |
+|---------|-------------|
+| `ag-jz-rm init --local` | Instalação local no projeto atual |
+| `ag-jz-rm init` | Instalação global e link de workspace |
 
 ---
 

@@ -1,111 +1,100 @@
 Param([switch]$Local)
 
-# Antigravity JZ Edition - Instalador Modular
-# Este script automatiza o download e configuração do Kit
-
-if ($Local) {
-    $BaseAgent = Join-Path (Get-Location) ".agent"
-    $KitDir = $BaseAgent # Kit is the .agent folder itself in local mode
-    $ZipFile = Join-Path $BaseAgent "kit.zip"
-    $TempExt = Join-Path $BaseAgent "temp_ext"
-    Write-Host "[!] Instalação LOCAL detectada (Workspace-only)" -ForegroundColor Yellow
-}
-else {
-    $InstallDir = Join-Path $env:USERPROFILE ".gemini\antigravity"
-    $KitDir = Join-Path $InstallDir "kit"
-    $ZipFile = Join-Path $InstallDir "kit.zip"
-    $TempExt = Join-Path $InstallDir "temp_ext"
-}
+$SKILLS_ZIP = "https://github.com/sickn33/antigravity-awesome-skills/archive/refs/heads/main.zip"
+$GLOBAL_BASE = Join-Path $env:USERPROFILE ".gemini\antigravity\kit"
 
 Write-Host ""
-Write-Host "🌌 Antigravity Kit (JZ e RM Edition) - Instalador" -ForegroundColor Cyan
-Write-Host "--------------------------------------------------" -ForegroundColor DarkCyan
+Write-Host "🌌 Antigravity JZ-RM Edition" -ForegroundColor Cyan
+Write-Host "──────────────────────────" -ForegroundColor Gray
 
-# 1. Preparar pastas
-if ($Local) {
-    if (-not (Test-Path $BaseAgent)) { New-Item -ItemType Directory -Path $BaseAgent -Force | Out-Null }
-}
-else {
-    if (-not (Test-Path $InstallDir)) { New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null }
-}
+# 1. Determine Paths
+$InstallDir = if ($Local) { Join-Path (Get-Location) ".agent" } else { $GLOBAL_BASE }
+$TempDir = Join-Path (Get-Location) "tmp_jz_rm"
 
-# 2. Cleanup se já existir (Apenas se for global ou kit_source antigo)
-if (-not $Local -and (Test-Path $KitDir)) {
-    Write-Host "[!] Instalação anterior detectada. Atualizando..." -ForegroundColor Yellow
-    Remove-Item $KitDir -Recurse -Force
-}
-
-# 3. Download
-Write-Host "[>] Baixando última versão do repositório Academico-JZ..." -ForegroundColor Gray
-try {
-    Invoke-WebRequest -Uri "https://github.com/Academico-JZ/antigravity-jz-rm/archive/refs/heads/main.zip" -OutFile $ZipFile -ErrorAction Stop
-}
-catch {
-    Write-Error "Erro ao baixar o kit: $_"
-    exit 1
+# Helper to fetch and extract
+function Get-Source($Url, $Name, $Dest) {
+    Write-Host "[>] Downloading $Name library..." -ForegroundColor Gray
+    $ZipPath = Join-Path $Dest "$Name.zip"
+    $ExtractPath = Join-Path $Dest $Name
+    Invoke-WebRequest -Uri $Url -OutFile $ZipPath
+    Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force
+    Remove-Item $ZipPath -Force
+    return (Get-ChildItem -Path $ExtractPath | Where-Object { $_.PSIsContainer } | Select-Object -First 1).FullName
 }
 
-# 4. Extração
-Write-Host "[>] Extraindo arquivos..." -ForegroundColor Gray
-if (Test-Path $TempExt) { Remove-Item $TempExt -Recurse -Force }
-Expand-Archive -Path $ZipFile -DestinationPath $TempExt
-
-# Localizar a pasta extraída (o GitHub coloca o branch no nome)
-$ExtractedFolder = Get-ChildItem -Path $TempExt | Where-Object { $_.PSIsContainer } | Select-Object -First 1
-
-if ($Local) {
-    Write-Host "[>] Populando estrutura local..." -ForegroundColor Gray
-    # Move todos os subdiretórios de .agent para a .agent root
-    $SourceAgent = Join-Path $ExtractedFolder.FullName ".agent"
-    Get-ChildItem -Path $SourceAgent | ForEach-Object {
-        $dest = Join-Path $BaseAgent $_.Name
-        if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
-        Move-Item $_.FullName $dest
-    }
-    # Move scripts da raiz para .agent/scripts
-    $SourceScripts = Join-Path $ExtractedFolder.FullName "scripts"
-    $DestScripts = Join-Path $BaseAgent "scripts"
-    if (Test-Path $SourceScripts) {
-        if (Test-Path $DestScripts) { Remove-Item $DestScripts -Recurse -Force }
-        Move-Item $SourceScripts $DestScripts
-    }
-}
-else {
-    Move-Item -Path $ExtractedFolder.FullName -Destination $KitDir
-}
-
-# 5. Cleanup Final
-Remove-Item $ZipFile -Force
-Remove-Item $TempExt -Recurse -Force
-
-# 6. Auto-Hydration (Sync Skills)
+# 2. Base Layer Initialization
 Write-Host ""
-Write-Host "🔄 Unifying Skills & Agents..." -ForegroundColor Cyan
+Write-Host "🚀 Initializing Antigravity Core (@vudovn/ag-kit)..." -ForegroundColor Cyan
 try {
-    $SyncScript = if ($Local) { Join-Path $BaseAgent "scripts\sync_kits.py" } else { Join-Path $KitDir ".agent\scripts\sync_kits.py" }
-    
-    & python "$SyncScript" *>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "[✨] 255+ Skills & 21 Agents merged successfully." -ForegroundColor Green
+    if ($Local) {
+        npx -y @vudovn/ag-kit init
     }
     else {
-        Write-Host "[!] Auto-hydration incomplete. Run manually later." -ForegroundColor Yellow
+        Write-Host "[>] Global mode: Installing core components..." -ForegroundColor Gray
+        npm install -g @vudovn/ag-kit *>$null
+        ag-kit init
     }
 }
 catch {
-    Write-Host "[!] Sync issue." -ForegroundColor Yellow
+    Write-Host "[!] Base initialization had warnings. Continuing..." -ForegroundColor Yellow
 }
 
-# 7. Linking (Auto-Init)
-if (-not $Local -and (Test-Path "$KitDir\scripts\setup_workspace.ps1")) {
+# 3. High-Octane Skills Augmentation
+Write-Host ""
+Write-Host "Turbo-charging Skills Ecosystem..." -ForegroundColor Cyan
+if (Test-Path $TempDir) { Remove-Item $TempDir -Recurse -Force | Out-Null }
+New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
+
+try {
+    $SkillsPath = Get-Source -Url $SKILLS_ZIP -Name "skills" -Dest $TempDir
+    $SrcSkills = Join-Path $SkillsPath ".agent\skills"
+    
+    if (Test-Path $SrcSkills) {
+        Write-Host " [+] Injecting 255+ Specialist Skills" -ForegroundColor Gray
+        $DestSkills = Join-Path $InstallDir "skills"
+        if (-not (Test-Path $DestSkills)) { New-Item -ItemType Directory -Path $DestSkills -Force | Out-Null }
+        Copy-Item -Path "$SrcSkills\*" -Destination $DestSkills -Recurse -Force
+    }
+}
+catch {
+    Write-Host "[!] Skills download failed. You can run 'ag-kit update' later." -ForegroundColor Yellow
+}
+
+# 4. Identity Governance
+Write-Host "Applying Identity & Rules Governance..." -ForegroundColor Cyan
+$LocalAgentDir = Join-Path $PSScriptRoot ".agent"
+$SrcGemini = Join-Path $LocalAgentDir "rules\GEMINI.md"
+$DestRules = Join-Path $InstallDir "rules"
+$DestGemini = Join-Path $DestRules "GEMINI.md"
+
+if (-not (Test-Path $DestRules)) { New-Item -ItemType Directory -Path $DestRules -Force | Out-Null }
+if (Test-Path $SrcGemini) {
+    Copy-Item $SrcGemini -Destination $DestGemini -Force
+    Write-Host " [✨] Antigravity JZ-RM Rules Activated" -ForegroundColor Green
+}
+
+# Copy auxiliary scripts
+$SrcScripts = Join-Path $LocalAgentDir "scripts"
+$DestScripts = Join-Path $InstallDir "scripts"
+if (Test-Path $SrcScripts) {
+    Copy-Item -Path "$SrcScripts\*" -Destination $DestScripts -Recurse -Force
+}
+
+# 5. Cleanup
+Remove-Item $TempDir -Recurse -Force | Out-Null
+
+# 6. Indexing
+$Indexer = Join-Path $InstallDir "scripts\generate_index.py"
+if (Test-Path $Indexer) {
     Write-Host ""
-    Write-Host "🔗 Linking current workspace..." -ForegroundColor Cyan
-    & powershell -ExecutionPolicy Bypass -File "$KitDir\scripts\setup_workspace.ps1" | Out-Null
-    Write-Host "[✨] Workspace linked to Global Kit." -ForegroundColor Green
+    Write-Host "📦 Indexing Capabilities..." -ForegroundColor Cyan
+    & python "$Indexer" *>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host " [✨] Skills Indexer: 100% Optimized" -ForegroundColor Green
+    }
 }
 
 Write-Host ""
 Write-Host "✅ $(if($Local){'Local'}else{'Global'}) Setup Complete!" -ForegroundColor Green
-Write-Host "🚀 Antigravity JZ-RM is now ONLINE." -ForegroundColor Cyan
-Write-Host "Rules active in .agent/rules/GEMINI.md" -ForegroundColor Gray
+Write-Host "──────────────────────────" -ForegroundColor Gray
 Write-Host ""

@@ -14,9 +14,9 @@ const { execSync } = require('child_process');
 const os = require('os');
 
 // Configuration
-const REPO_ZIP_URL = "https://github.com/Academico-JZ/antigravity-jz-rm/archive/refs/heads/main.zip";
+const REPO_CORE_URL = "https://github.com/vudovn/antigravity-kit/archive/refs/heads/main.zip";
+const REPO_SKILLS_URL = "https://github.com/sickn33/antigravity-awesome-skills/archive/refs/heads/main.zip";
 const KIT_DIR_NAME = ".gemini/antigravity/kit";
-const TEMP_DIR_NAME = ".gemini/antigravity/temp_npm_install";
 
 // Colors for console
 const colors = {
@@ -101,149 +101,137 @@ function downloadFile(url, dest) {
     });
 }
 
+function logHeader() {
+    log("\n🌌 Antigravity JZ-RM Edition", colors.cyan);
+    log("──────────────────────────", colors.gray);
+}
+
+async function fetchRepo(url, name, destDir) {
+    const zipPath = path.join(destDir, `${name}.zip`);
+    log(`[>] Downloading ${name} library...`, colors.gray);
+    await downloadFile(url, zipPath);
+
+    const extractPath = path.join(destDir, name);
+    if (!fs.existsSync(extractPath)) fs.mkdirSync(extractPath, { recursive: true });
+
+    try {
+        execSync(`tar -xf "${zipPath}" -C "${extractPath}"`, { stdio: 'ignore' });
+    } catch (e) {
+        if (process.platform === 'win32') {
+            execSync(`powershell -c "Expand-Archive -Path '${zipPath}' -DestinationPath '${extractPath}' -Force"`, { stdio: 'ignore' });
+        } else {
+            throw e;
+        }
+    }
+    fs.unlinkSync(zipPath);
+
+    const extractedFolder = fs.readdirSync(extractPath).find(n => {
+        const fullPath = path.join(extractPath, n);
+        return fs.statSync(fullPath).isDirectory() && n !== "__MACOSX";
+    });
+
+    return path.join(extractPath, extractedFolder);
+}
+
+function mergeFolders(src, dest) {
+    if (!fs.existsSync(src)) return;
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+
+    const items = fs.readdirSync(src);
+    items.forEach(item => {
+        const sPath = path.join(src, item);
+        const dPath = path.join(dest, item);
+
+        if (fs.statSync(sPath).isDirectory()) {
+            mergeFolders(sPath, dPath);
+        } else {
+            fs.copyFileSync(sPath, dPath);
+        }
+    });
+}
+
 async function main() {
-    log("\n🌌 Antigravity Kit (JZ e RM Edition) - CLI Installer", colors.cyan);
-    log("--------------------------------------------------", colors.gray);
+    logHeader();
 
     const isLocal = process.argv.includes('--local') || process.argv.includes('-l');
     const homeDir = getHomeDir();
     const globalKitDir = path.join(homeDir, KIT_DIR_NAME);
-    const tempDir = path.join(homeDir, TEMP_DIR_NAME);
-    const zipPath = path.join(tempDir, "kit.zip");
-
-    // Define install directory based on mode
     const installDir = isLocal ? path.join(process.cwd(), ".agent") : globalKitDir;
+    const tempDir = path.join(process.cwd(), "tmp_jz_rm");
 
     try {
-        // 1. Prepare Paths
-        if (fs.existsSync(tempDir)) {
-            fs.rmSync(tempDir, { recursive: true, force: true });
+        // 1. Base Layer Initialization
+        log(`\n🚀 Initializing Antigravity Core (@vudovn/ag-kit)...`, colors.cyan);
+        try {
+            if (isLocal) {
+                // Ensure target dir doesn't block giget
+                execSync(`npx -y @vudovn/ag-kit init`, { stdio: 'inherit' });
+            } else {
+                log(`[>] Global mode: Installing @vudovn/ag-kit core...`, colors.gray);
+                execSync(`npm install -g @vudovn/ag-kit`, { stdio: 'ignore' });
+                execSync(`ag-kit init`, { stdio: 'inherit' });
+            }
+        } catch (e) {
+            log(`[!] Base initialization warned or failed. Attempting to continue...`, colors.yellow);
         }
+
+        // 2. High-Octane Skills Augmentation (Sickn33)
+        log(`\nTurbo-charging Skills Ecosystem...`, colors.cyan);
+        if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
         fs.mkdirSync(tempDir, { recursive: true });
 
-        // 2. Download with Retry Logic
-        log(`[>] Downloading kit from GitHub...`, colors.gray);
+        const skillsPath = await fetchRepo(REPO_SKILLS_URL, "skills", tempDir);
+        const skillsSource = path.join(skillsPath, '.agent', 'skills');
 
-        let success = false;
-        let attempts = 0;
-        const maxAttempts = 3;
-
-        while (attempts < maxAttempts && !success) {
-            try {
-                attempts++;
-                if (attempts > 1) log(`[!] Retry attempt ${attempts}/${maxAttempts}...`, colors.yellow);
-                await downloadFile(REPO_ZIP_URL, zipPath);
-                success = true;
-            } catch (e) {
-                if (attempts === maxAttempts) throw e;
-                log(`[!] Connection issue: ${e.message}. Retrying in 3s...`, colors.yellow);
-                await new Promise(r => setTimeout(r, 3000));
-            }
+        if (fs.existsSync(skillsSource)) {
+            log(` [+] Injecting 255+ Specialist Skills`, colors.gray);
+            mergeFolders(skillsSource, path.join(installDir, 'skills'));
         }
 
-        // 3. Extract
-        log(`[>] Extracting...`, colors.gray);
-        // Use tar for extraction (available on Win10+, Mac, Linux)
-        try {
-            execSync(`tar -xf "${zipPath}" -C "${tempDir}"`);
-        } catch (e) {
-            // Fallback for older Windows without tar?
-            if (process.platform === 'win32') {
-                execSync(`powershell -c "Expand-Archive -Path '${zipPath}' -DestinationPath '${tempDir}' -Force"`);
-            } else {
-                throw e;
-            }
+        // 3. Identity Governance (GEMINI.md)
+        log(`Applying Identity & Rules Governance...`, colors.cyan);
+
+        // Use the local GEMINI.md from this package as the source of truth
+        const localGemini = path.join(__dirname, '..', '.agent', 'rules', 'GEMINI.md');
+        const destRulesDir = path.join(installDir, 'rules');
+        const destGemini = path.join(destRulesDir, 'GEMINI.md');
+
+        if (!fs.existsSync(destRulesDir)) fs.mkdirSync(destRulesDir, { recursive: true });
+        if (fs.existsSync(localGemini)) {
+            fs.copyFileSync(localGemini, destGemini);
+            log(` [✨] Antigravity JZ-RM Rules Activated`, colors.green);
         }
 
-        // 4. Move to Final Location
-        if (fs.existsSync(installDir)) {
-            log(`[!] Removing existing installation...`, colors.yellow);
-            fs.rmSync(installDir, { recursive: true, force: true });
+        // Copy auxiliary scripts too
+        const localScripts = path.join(__dirname, '..', '.agent', 'scripts');
+        const destScripts = path.join(installDir, 'scripts');
+        if (fs.existsSync(localScripts)) {
+            mergeFolders(localScripts, destScripts);
         }
 
-        // Find extracted folder (GitHub names it repo-branch, e.g. antigravity-jz-rm-main)
-        const extractedName = fs.readdirSync(tempDir).find(n => {
-            const fullPath = path.join(tempDir, n);
-            return fs.statSync(fullPath).isDirectory() && n !== "__MACOSX";
-        });
-
-        if (!extractedName) {
-            throw new Error("Could not find extracted folder in temporary directory.");
-        }
-
-        const sourcePath = path.join(tempDir, extractedName);
-
-        if (isLocal) {
-            log(`[>] Local Mode: Populating .agent directory...`, colors.gray);
-            const repoAgentPath = path.join(sourcePath, '.agent');
-            const repoScriptsPath = path.join(sourcePath, 'scripts');
-
-            // Move contents of .agent
-            if (fs.existsSync(repoAgentPath)) {
-                const items = fs.readdirSync(repoAgentPath);
-                items.forEach(item => {
-                    const s = path.join(repoAgentPath, item);
-                    const d = path.join(installDir, item);
-                    if (fs.existsSync(d)) fs.rmSync(d, { recursive: true, force: true });
-                    fs.renameSync(s, d);
-                });
-            }
-            // Move scripts folder into .agent for local use
-            const localScriptsPath = path.join(installDir, 'scripts');
-            if (fs.existsSync(repoScriptsPath)) {
-                if (fs.existsSync(localScriptsPath)) fs.rmSync(localScriptsPath, { recursive: true, force: true });
-                fs.renameSync(repoScriptsPath, localScriptsPath);
-            }
-        } else {
-            fs.mkdirSync(path.dirname(installDir), { recursive: true });
-            fs.renameSync(sourcePath, installDir);
-        }
-
-        // 5. Cleanup
+        // 4. Cleanup
         fs.rmSync(tempDir, { recursive: true, force: true });
 
-        // 6. Auto-Hydration (Sync Kits)
-        const syncScript = isLocal
-            ? path.join(installDir, 'scripts', 'sync_kits.py')
-            : path.join(installDir, '.agent', 'scripts', 'sync_kits.py');
-
-        if (fs.existsSync(syncScript)) {
-            log(`\n🔄 Unifying Skills & Agents...`, colors.cyan);
+        // 5. Final Orchestration (Indexing)
+        const indexerScript = path.join(destScripts, 'generate_index.py');
+        if (fs.existsSync(indexerScript)) {
+            log(`\n📦 Indexing Capabilities...`, colors.cyan);
             try {
-                // Run silently, only show errors
-                execSync(`python "${syncScript}"`, { stdio: 'pipe' });
-                log(`[✨] 255+ Skills & 21 Agents merged successfully.`, colors.green);
+                execSync(`python "${indexerScript}"`, { stdio: 'ignore' });
+                log(` [✨] Skills Indexer: 100% Optimized`, colors.green);
             } catch (e) {
-                log(`[!] Auto-hydration had minor issues. Run manually: python "${syncScript}"`, colors.yellow);
+                log(` [!] Indexer manual run: python .agent/scripts/generate_index.py`, colors.yellow);
             }
         }
 
-        // 7. Success
-        log(`\n${isLocal ? "📁 Local Mode" : "🌍 Global Mode"} Setup Complete!`, colors.green);
-        log(`📍 Path: ${installDir}`, colors.gray);
-
-        if (!isLocal && process.platform === 'win32') {
-            log(`\n🔗 Linking current workspace...`, colors.cyan);
-            const setupScript = path.join(installDir, 'scripts', 'setup_workspace.ps1');
-            try {
-                execSync(`powershell -ExecutionPolicy Bypass -File "${setupScript}"`, {
-                    stdio: 'pipe',
-                    cwd: process.cwd()
-                });
-                log(`[✨] Workspace linked to Global Kit.`, colors.green);
-            } catch (e) {
-                log(`[!] Auto-link failed. Run manually:`, colors.yellow);
-                log(`powershell -File "${setupScript}"`, colors.reset);
-            }
-        }
-
-        log(`\n🚀 Antigravity JZ-RM is now ONLINE.`, colors.cyan);
-        log(`Rules active in: ${isLocal ? ".agent/rules/GEMINI.md" : ".agent/rules/GEMINI.md (Linked)"}`, colors.gray);
-        log(`\n--------------------------------------------------`, colors.gray);
+        log(`\n✅ ${isLocal ? "Local" : "Global"} Setup Complete!`, colors.green);
+        log(`🚀 Antigravity JZ-RM is now ONLINE.`, colors.cyan);
+        log(`Rules: .agent/rules/GEMINI.md`, colors.gray);
+        log(`\n──────────────────────────`, colors.gray);
 
     } catch (err) {
-        log(`\n❌ Error: ${err.message}`, colors.red);
-        if (err.stderr) log(err.stderr.toString(), colors.red);
+        log(`\n❌ Setup Error: ${err.message}`, colors.red);
+        if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
         process.exit(1);
     }
 }
