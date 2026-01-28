@@ -47,7 +47,7 @@ New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
 
 try {
     $SkillsPath = Get-Source -Url $SKILLS_ZIP -Name "skills" -Dest $TempDir
-    $SrcSkills = Join-Path $SkillsPath ".agent\skills"
+    $SrcSkills = Join-Path $SkillsPath "skills"
     
     if (Test-Path $SrcSkills) {
         Write-Host " [+] Injecting 255+ Specialist Skills" -ForegroundColor Gray

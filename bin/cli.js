@@ -171,12 +171,13 @@ async function main() {
             // Use giget directly via npx for maximum extraction robustness
             execSync(`npx -y giget github:sickn33/antigravity-awesome-skills#main "${tempDir}"`, { stdio: 'ignore' });
 
-            const skillsSource = path.join(tempDir, '.agent', 'skills');
+            // CORRECTED PATH: skills are at root 'skills/' in the repo
+            const skillsSource = path.join(tempDir, 'skills');
             if (fs.existsSync(skillsSource)) {
                 log(` [+] Injecting 255+ Specialist Skills`, colors.gray);
                 mergeFolders(skillsSource, path.join(installDir, 'skills'));
             } else {
-                log(` [!] Could not find skills in downloaded folder.`, colors.yellow);
+                log(` [!] Could not find skills in downloaded folder. (Checked: ${skillsSource})`, colors.yellow);
             }
         } catch (e) {
             log(` [!] Turbo-charge failed: ${e.message}`, colors.red);
@@ -195,7 +196,7 @@ async function main() {
             fs.copyFileSync(localGemini, destGemini);
             log(` [✨] Antigravity JZ-RM Rules Activated`, colors.green);
         } else {
-            // Fallback for npx run: check if .agent is in same level as bin
+            // Fallback for npx run: check if rules is in same level as bin
             const fallbackGemini = path.join(__dirname, 'rules', 'GEMINI.md');
             if (fs.existsSync(fallbackGemini)) {
                 fs.copyFileSync(fallbackGemini, destGemini);
@@ -218,7 +219,9 @@ async function main() {
         if (fs.existsSync(indexerScript)) {
             log(`\n📦 Indexing Capabilities...`, colors.cyan);
             try {
-                execSync(`python "${indexerScript}"`, { stdio: 'ignore' });
+                // Use python or python3 depending on what's available
+                const pyCmd = process.platform === 'win32' ? 'python' : 'python3';
+                execSync(`${pyCmd} "${indexerScript}"`, { stdio: 'ignore' });
                 log(` [✨] Skills Indexer: 100% Optimized`, colors.green);
             } catch (e) {
                 log(` [!] Indexer manual run: python .agent/scripts/generate_index.py`, colors.yellow);
