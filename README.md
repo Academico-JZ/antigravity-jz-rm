@@ -27,7 +27,7 @@ O Antigravity JZ-RM é um **Aggregator Inteligente** que orquestra a instalaçã
 Ideal para projetos específicos. Instala tudo na pasta `.agent/` do seu diretório atual.
 
 ```bash
-npx github:Academico-JZ/antigravity-jz-rm init --local
+npx github:Academico-JZ/ag-jz-rm init --local
 ```
 *(Ideal para projetos isolados ou que exigem versões específicas das skills sem afetar o resto do sistema)*
 
@@ -35,7 +35,7 @@ npx github:Academico-JZ/antigravity-jz-rm init --local
 Ideal para ter acesso ao kit em qualquer terminal.
 
 ```bash
-npm install -g github:Academico-JZ/antigravity-jz-rm
+npm install -g github:Academico-JZ/ag-jz-rm
 ag-jz-rm init
 ```
 

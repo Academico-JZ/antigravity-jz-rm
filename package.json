@@ -31,7 +31,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Academico-JZ/antigravity-jz-rm.git"
+        "url": "https://github.com/Academico-JZ/ag-jz-rm.git"
     },
     "engines": {
         "node": ">=14"
