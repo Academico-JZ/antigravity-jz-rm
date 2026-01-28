@@ -26,8 +26,8 @@ Este repositório é uma evolução do ecossistema Antigravity, consolidando o *
 Acesso total em qualquer terminal e automação completa no seu playground.
 
 ```bash
-# 1. Instale o core ag-jz-rm (com --force para evitar conflitos)
-npm i -g Academico-JZ/ag-jz-rm --force
+# 1. Instale o core ag-jz-rm
+npm i -g Academico-JZ/ag-jz-rm
 
 # 2. Inicialize o motor central
 ag-jz-rm init
@@ -38,13 +38,6 @@ Para projetos que exigem versões específicas ou portabilidade total via Git.
 
 ```bash
 npx Academico-JZ/ag-jz-rm init --local
-```
-
-### 🛡️ Opção C: Instalação Robusta (PowerShell / Sem Git)
-Para ambientes restritos onde o `git` não está instalado ou o `npx` falha.
-
-```powershell
-irm https://raw.githubusercontent.com/Academico-JZ/ag-jz-rm/main/bootstrap.ps1 | iex
 ```
 
 ---

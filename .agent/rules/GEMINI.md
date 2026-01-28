@@ -1,34 +1,16 @@
 ---
 trigger: always_on
 ---
-# GEMINI.md - Antigravity Kit (JZ-RM Edition)
-
+# GEMINI.md - Antigravity Kit
 > This file defines how the AI behaves in this workspace.
-
 ---
-
-## ⚡ AUTOMATED WORKSPACE LINKER (TIER 0)
-**Mandatory: Executed on session start if workspace is unlinked.**
-
-1. **Detection**: Check if `.agent` directory exists in project root.
-2. **Action**: If MISSING, immediately execute the modular linking script: `python $env:USERPROFILE\.gemini\antigravity\kit\scripts\workspace_linker.py` (or use `ag-jz-rm link`).
-3. **Requirement**: Do NOT proceed with any task until `.agent` is provisioned and Neural Engine is online.
-
----
-
 ## CRITICAL: AGENT & SKILL PROTOCOL (START HERE)
-> **MANDATORY:** You MUST read the appropriate agent file and its skills BEFORE performing any implementation. This is the highest priority rule. USE MCP `sequential-thinking` always.
+> **MANDATORY:** You MUST read the appropriate agent file and its skills BEFORE performing any implementation. This is the highest priority rule.
 ### 1. Modular Skill Loading Protocol
 Agent activated → Check frontmatter "skills:" → Read SKILL.md (INDEX) → Read specific sections.
 - **Selective Reading:** DO NOT read ALL files in a skill folder. Read `SKILL.md` first, then only read sections matching the user's request.
 - **Rule Priority:** P0 (GEMINI.md) > P1 (Agent .md) > P2 (SKILL.md). All rules are binding.
-- **Catalog Lookup:** If a requested capability is not found in the immediate context, you MUST read `.agent/scripts/skills_index.json` and search for relevant skills before assuming unavailability.
-### 2. Skill Discovery via Index (Secondary Lookup)
-If NO local skill matching the user's request is found in your immediate context or frontmatter:
-1.  **Read** `.agent/scripts/skills_index.json`.
-2.  **Search** for relevant keywords (name, description, tags) to identify the appropriate skill path.
-3.  **Proactively invoke** the identified skill.
-### 3. Enforcement Protocol
+### 2. Enforcement Protocol
 1. **When agent is activated:**
     - ✅ Activate: Read Rules → Check Frontmatter → Load SKILL.md → Apply All.
 2. **Forbidden:** Never skip reading agent rules or skill instructions. "Read → Understand → Apply" is mandatory.
@@ -83,10 +65,9 @@ When user's prompt is NOT in English:
 ### 🗺️ System Map Read
 > 🔴 **MANDATORY:** Read `ARCHITECTURE.md` at session start to understand Agents, Skills, and Scripts.
 **Path Awareness:**
-- Agents: `.agent/agents/` (Project)
+- Agents: `.agent/` (Project)
 - Skills: `.agent/skills/` (Project)
-- Workflows: `.agent/workflows/` (Project)
-- Runtime Scripts: `.agent/scripts/`
+- Runtime Scripts: `.agent/skills/<skill>/scripts/`
 ### 🧠 Read → Understand → Apply
 ```
 ❌ WRONG: Read agent file → Start coding

@@ -12,7 +12,6 @@ const path = require('path');
 const https = require('https');
 const { execSync } = require('child_process');
 const os = require('os');
-const readline = require('readline');
 
 // Configuration
 const REPO_CORE_URL = "https://github.com/vudovn/antigravity-kit/archive/refs/heads/main.zip";
@@ -116,19 +115,21 @@ async function link(installDir, globalKitDir) {
     log(`Happy hacking! 🚀\n`, colors.cyan);
 }
 
+
 async function init(isLocal, installDir, globalKitDir) {
     logHeader();
 
+    // Use system temp for less friction and avoid EPERM on ./ paths
     const tempDir = path.join(os.tmpdir(), `jz_rm_turbo_${Date.now()}`);
 
     try {
         log(`\n🛰️  Synchronizing Quantum Core...`, colors.cyan);
         try {
             if (isLocal) {
-                execSync(`npx -y @vudovn/ag-kit init`, { stdio: 'ignore' });
+                execSync(`npx -y @vudovn/ag-kit init`, { stdio: 'inherit' });
             } else {
                 execSync(`npm install -g @vudovn/ag-kit`, { stdio: 'ignore' });
-                execSync(`ag-kit init`, { stdio: 'ignore' });
+                execSync(`ag-kit init`, { stdio: 'inherit' });
             }
             log(` [✨] Core Engine: Online`, colors.green);
         } catch (e) {
@@ -138,59 +139,72 @@ async function init(isLocal, installDir, globalKitDir) {
         log(`\n⚡ Injecting High-Octane Capabilities...`, colors.cyan);
         log(` [>] Pulling 255+ Specialist Skills from Library...`, colors.gray);
         try {
+            // Use giget directly via npx for maximum extraction robustness on Windows
             execSync(`npx -y giget github:sickn33/antigravity-awesome-skills#main "${tempDir}"`, { stdio: 'ignore' });
 
-            const skillsSource = path.join(tempDir, 'skills');
+            const skillsSource = path.join(tempDir, '.agent', 'skills');
+            // Check both potential paths (giget sometimes flattens)
+            const skillsSourceAlt = path.join(tempDir, 'skills');
+
             if (fs.existsSync(skillsSource)) {
                 mergeFolders(skillsSource, path.join(installDir, 'skills'));
                 log(` [🚀] 255+ Skills Successfully Integrated`, colors.green);
+            } else if (fs.existsSync(skillsSourceAlt)) {
+                mergeFolders(skillsSourceAlt, path.join(installDir, 'skills'));
+                log(` [🚀] 255+ Skills Successfully Integrated (Direct)`, colors.green);
+            } else {
+                log(` [!] Warning: Skills folder structure unexpected. Validation needed.`, colors.yellow);
             }
 
-            const scriptsSource = path.join(tempDir, 'scripts');
+            const scriptsSource = path.join(tempDir, '.agent', 'scripts');
             if (fs.existsSync(scriptsSource)) {
-                log(` [🛠️] Augmenting Scripts Ecosystem (Validator/Manager)`, colors.gray);
+                log(` [🛠️] Augmenting Scripts Ecosystem`, colors.gray);
                 mergeFolders(scriptsSource, path.join(installDir, 'scripts'));
             }
         } catch (e) {
-            log(` [!] Skill Injection Timeout. You can run 'ag-jz-rm update' later.`, colors.yellow);
+            log(` [!] Skill Injection Failed: ${e.message}. Run 'ag-jz-rm update' later.`, colors.yellow);
         }
 
         log(`Applying Identity & Governance Protocols...`, colors.cyan);
 
-        const localGemini = path.join(__dirname, '..', '.agent', 'rules', 'GEMINI.md');
+        // Robust GEMINI.md finding logic
+        const possibleGeminiPaths = [
+            path.join(__dirname, '..', '.agent', 'rules', 'GEMINI.md'),
+            path.join(__dirname, '..', '.agent', 'GEMINI.md'),
+            path.join(__dirname, 'rules', 'GEMINI.md'), // For npx packed structure
+            path.join(process.cwd(), 'GEMINI.md') // Fallback dev
+        ];
+
+        let localGemini = possibleGeminiPaths.find(p => fs.existsSync(p));
         const destRulesDir = path.join(installDir, 'rules');
         const destGemini = path.join(destRulesDir, 'GEMINI.md');
 
         if (!fs.existsSync(destRulesDir)) fs.mkdirSync(destRulesDir, { recursive: true });
-        if (fs.existsSync(localGemini)) {
+
+        if (localGemini) {
             fs.copyFileSync(localGemini, destGemini);
             log(` [🔭] JZ-RM Logic Protocols: Active`, colors.green);
+        } else {
+            log(` [!] Notice: Standard Identity Rules not found. Using Base Rules.`, colors.gray);
         }
 
+        // Copy auxiliary local scripts if present
         const localScripts = path.join(__dirname, '..', '.agent', 'scripts');
-        const destScripts = path.join(installDir, 'scripts');
         if (fs.existsSync(localScripts)) {
-            mergeFolders(localScripts, destScripts);
+            mergeFolders(localScripts, path.join(installDir, 'scripts'));
         }
 
         safeRemove(tempDir);
 
-        const indexerScript = path.join(destScripts, 'generate_index.py');
-        const validatorScript = path.join(destScripts, 'validate_skills.py');
-
+        const indexerScript = path.join(installDir, 'scripts', 'generate_index.py');
         if (fs.existsSync(indexerScript)) {
             log(`\n📦 Initializing Neural Discovery & Validation...`, colors.cyan);
             const pyCmd = process.platform === 'win32' ? 'python' : 'python3';
-
             try {
                 execSync(`${pyCmd} "${indexerScript}"`, { stdio: 'ignore' });
                 log(` [✨] Neural Map: 100% Optimized`, colors.green);
-
-                if (fs.existsSync(validatorScript)) {
-                    log(` [🛡️] Integrity Scan: Completed`, colors.gray);
-                }
             } catch (e) {
-                log(` [!] Run 'python .agent/scripts/generate_index.py' to manually optimize map.`, colors.yellow);
+                log(` [!] Run 'python .agent/scripts/generate_index.py' manually.`, colors.yellow);
             }
         }
 
@@ -209,59 +223,7 @@ async function init(isLocal, installDir, globalKitDir) {
     }
 }
 
-
-
-async function checkUpdate() {
-    return new Promise((resolve) => {
-        const url = 'https://raw.githubusercontent.com/Academico-JZ/ag-jz-rm/main/package.json';
-        https.get(url, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    const remotePkg = JSON.parse(data);
-                    const localPkg = require('../package.json');
-
-                    if (remotePkg.version > localPkg.version) {
-                        console.log(colors.yellow(`\n\n🚨  UPDATE AVAILABLE: v${localPkg.version} -> v${remotePkg.version}`));
-                        console.log(colors.gray(`    A new version of JZ-RM Kit is available.`));
-
-                        const rl = readline.createInterface({
-                            input: process.stdin,
-                            output: process.stdout
-                        });
-
-                        rl.question(colors.cyan('    ⚡  Deseja atualizar agora? (S/n) '), (answer) => {
-                            rl.close();
-                            if (answer.toLowerCase() !== 'n') {
-                                console.log(colors.cyan('\n🚀  Updating Quantum Core...'));
-                                try {
-                                    execSync('npm install -g Academico-JZ/ag-jz-rm --force', { stdio: 'inherit' });
-                                    console.log(colors.green('✅  Update complete! Please run the command again.'));
-                                    process.exit(0);
-                                } catch (e) {
-                                    console.log(colors.red('❌  Update failed. Please run: npm i -g Academico-JZ/ag-jz-rm'));
-                                    resolve();
-                                }
-                            } else {
-                                resolve();
-                            }
-                        });
-                    } else {
-                        resolve();
-                    }
-                } catch (e) {
-                    resolve(); // Silent fail on network/json error
-                }
-            });
-        }).on('error', () => resolve());
-    });
-}
-
 async function main() {
-    await checkUpdate();
-
-    // ... (rest of main)
     const isLocal = process.argv.includes('--local') || process.argv.includes('-l');
     const homeDir = getHomeDir();
     const globalKitDir = path.join(homeDir, KIT_DIR_NAME);
